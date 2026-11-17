@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 와우고 교원 포털 사이트 아이콘 — © 2026 티쳐무 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="와우고 교원 포털">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3f6ae8"/>
+      <stop offset=".58" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#g)"/>
+  <!-- 학교 건물 — 지붕 · 본채 · 창 넷 · 문 -->
+  <path d="M32 11 54 23H10z" fill="#fff"/>
+  <rect x="15" y="25" width="34" height="27" rx="3" fill="#fff"/>
+  <rect x="20" y="30" width="7" height="7" rx="1.6" fill="#3f6ae8"/>
+  <rect x="37" y="30" width="7" height="7" rx="1.6" fill="#3f6ae8"/>
+  <rect x="20" y="41" width="7" height="7" rx="1.6" fill="#8b5cf6"/>
+  <rect x="29" y="41" width="6" height="11" rx="1.6" fill="#f59e0b"/>
+  <rect x="37" y="41" width="7" height="7" rx="1.6" fill="#8b5cf6"/>
+  <!-- 깃대 -->
+  <path d="M32 11V5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M33 5.4l7 2.2-7 2.2z" fill="#fff"/>
+</svg>

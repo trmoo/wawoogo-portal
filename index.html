@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<!-- 와우고 교원 포털 — © 2026 티쳐무 · 모든 권리 보유
+     카드 목록과 사용법 글은 content.js(로컬 원본) 또는 locked.js(암호로 잠근 판)에 있다.
+     날짜는 updated.js — node tools/update-dates.mjs 가 깃허브 저장소에서 모아 적는다. -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>와우고 교원 포털</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+  :root{
+    --bg1:#eef3ff;
+    --bg2:#f6f4ff;
+    --card:#ffffff;
+    --ink:#1f2a44;
+    --ink-soft:#5b6785;
+    --line:#e5eaf4;
+    --brand:#3f6ae8;
+    --brand-soft:#e9efff;
+    --brand-ink:#2a53d0;
+    --shadow:0 10px 30px rgba(38,63,140,.10);
+    --shadow-hover:0 18px 44px rgba(38,63,140,.20);
+    --accent:var(--brand);
+    --accent-soft:var(--brand-soft);
+    --accent-ink:var(--brand-ink);
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  html,body{margin:0;padding:0;}
+  html.locked{overflow:hidden;}
+  body{
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 8% -12%, #dbe6ff 0%, transparent 55%),
+      radial-gradient(1000px 560px at 100% 0%, #efe5ff 0%, transparent 52%),
+      linear-gradient(180deg,var(--bg1),var(--bg2));
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    word-break:keep-all;
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:40px 22px 56px;}
+
+  /* ─── 머리 ─── */
+  header.hero{text-align:center;margin-bottom:26px;}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--brand-soft);color:var(--brand-ink);
+    font-weight:700;font-size:13px;letter-spacing:.02em;
+    padding:7px 14px;border-radius:999px;margin-bottom:16px;
+  }
+  h1{font-size:clamp(27px,5vw,42px);line-height:1.15;margin:0 0 12px;font-weight:800;letter-spacing:-.02em;}
+  h1 .grad{
+    background:linear-gradient(100deg,#3f6ae8,#8b5cf6 58%,#f59e0b);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--ink-soft);font-size:16px;margin:0 auto;max-width:640px;line-height:1.7;}
+
+  /* ─── 암호 가림막 ─── */
+  #gate{max-width:520px;margin:18px auto 0;}
+  .gate-box{
+    background:var(--card);border:1px solid var(--line);border-radius:22px;
+    box-shadow:var(--shadow);padding:30px 26px 24px;text-align:center;
+  }
+  .gate-lock{font-size:40px;line-height:1;margin-bottom:12px;}
+  .gate-box h2{margin:0 0 8px;font-size:20px;font-weight:800;}
+  .gate-box p{margin:0 0 18px;color:var(--ink-soft);font-size:14.5px;line-height:1.7;}
+  .gate-row{display:flex;gap:9px;}
+  .gate-row input{
+    flex:1;padding:13px 15px;border-radius:13px;border:1px solid var(--line);
+    background:#fff;font-size:16px;color:var(--ink);outline:none;transition:.18s;
+  }
+  .gate-row input:focus{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft);}
+  .gate-row button{
+    flex:none;padding:13px 20px;border:0;border-radius:13px;cursor:pointer;
+    background:var(--brand);color:#fff;font-size:15px;font-weight:700;
+    box-shadow:0 8px 20px rgba(63,106,232,.30);transition:.18s;
+  }
+  .gate-row button:hover{filter:brightness(1.06);}
+  .gate-row button:disabled{opacity:.6;cursor:default;box-shadow:none;}
+  .gate-msg{margin:14px 0 0;font-size:14px;color:#b42318;min-height:20px;}
+  .gate-hint{margin:16px 0 0;font-size:13.5px;color:var(--ink-soft);line-height:1.65;}
+
+  /* ─── 찾기·거르기 ─── */
+  .toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;margin:26px 0 6px;}
+  .search{position:relative;flex:1 1 320px;max-width:440px;}
+  .search input{
+    width:100%;padding:13px 16px 13px 44px;border-radius:14px;
+    border:1px solid var(--line);background:#fff;font-size:15px;color:var(--ink);
+    box-shadow:var(--shadow);outline:none;transition:.2s;
+  }
+  .search input:focus{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft);}
+  .search svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);opacity:.45;}
+  .filters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0 6px;}
+  .chip{
+    border:1px solid var(--line);background:#fff;color:var(--ink-soft);
+    padding:8px 15px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;transition:.18s;
+  }
+  .chip:hover{border-color:var(--brand);color:var(--brand);}
+  .chip.active{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 6px 16px rgba(63,106,232,.32);}
+
+  /* ─── 칸 ─── */
+  .section{margin-top:32px;}
+  .section-head{display:flex;align-items:center;gap:10px;margin:0 0 15px;padding:0 2px;}
+  .section-head .dot{width:11px;height:11px;border-radius:4px;flex:none;}
+  .section-head h2{font-size:19px;margin:0;font-weight:800;letter-spacing:-.01em;}
+  .section-head .count{color:var(--ink-soft);font-size:14px;font-weight:600;}
+  .soon{
+    background:#fff;border:1px dashed var(--line);border-radius:18px;
+    padding:20px 22px;color:var(--ink-soft);font-size:14.5px;line-height:1.75;
+  }
+  .soon b{color:var(--ink);}
+
+  /* ─── 카드 ─── */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+  .card{
+    position:relative;display:flex;flex-direction:column;
+    background:var(--card);border:1px solid var(--line);border-radius:20px;
+    padding:20px 20px 16px;box-shadow:var(--shadow);transition:.2s;overflow:hidden;
+  }
+  .card::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--accent);opacity:.9;}
+  .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:var(--accent);}
+  .c-top{display:flex;gap:13px;align-items:flex-start;margin-bottom:10px;}
+  .icon{
+    width:48px;height:48px;border-radius:15px;flex:none;
+    display:flex;align-items:center;justify-content:center;font-size:25px;
+    background:var(--accent-soft);
+  }
+  .c-title{min-width:0;flex:1;}
+  .tag{
+    display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.02em;
+    color:var(--accent-ink);background:var(--accent-soft);
+    padding:3px 9px;border-radius:999px;margin-bottom:5px;
+  }
+  .c-title h3{margin:0;font-size:17px;font-weight:800;letter-spacing:-.01em;line-height:1.35;}
+  /* 제목은 카드 전체를 덮는 링크 — 카드 아무 데나 눌러도 도구가 열린다 */
+  .stretch{color:inherit;text-decoration:none;}
+  .stretch::after{content:"";position:absolute;inset:0;z-index:1;}
+  .card p{margin:0 0 12px;color:var(--ink-soft);font-size:14px;line-height:1.7;}
+  .warn{
+    margin:0 0 12px;padding:9px 12px;border-radius:11px;
+    background:#fff8ec;border:1px solid #f6e0bb;color:#7a4b06;font-size:13px;line-height:1.6;
+  }
+  .warn b{color:#5c3804;}
+
+  .c-bottom{margin-top:auto;}
+  .c-meta{
+    display:flex;flex-wrap:wrap;gap:4px 12px;margin:0 0 12px;
+    padding-top:11px;border-top:1px dashed var(--line);
+    color:var(--ink-soft);font-size:12.5px;
+  }
+  .c-main{display:flex;gap:8px;margin-bottom:9px;}
+  .c-open{
+    position:relative;z-index:2;flex:1;
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    padding:11px 14px;border-radius:13px;text-decoration:none;
+    background:var(--accent);color:#fff;font-size:14.5px;font-weight:700;transition:.18s;
+  }
+  .c-open:hover{filter:brightness(1.07);}
+  .c-side{
+    position:relative;z-index:2;flex:none;width:46px;
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:11px 0;border-radius:13px;cursor:pointer;font-size:16px;
+    background:var(--accent-soft);color:var(--accent-ink);border:0;transition:.18s;
+  }
+  .c-side:hover{filter:brightness(.96);}
+  .c-pills{display:flex;flex-wrap:wrap;gap:7px;}
+  .pill{
+    position:relative;z-index:2;
+    display:inline-flex;align-items:center;gap:5px;
+    padding:7px 12px;border-radius:999px;cursor:pointer;text-decoration:none;
+    background:#f5f7fc;border:1px solid var(--line);color:var(--ink-soft);
+    font-size:12.5px;font-weight:600;transition:.18s;font-family:inherit;
+  }
+  .pill:hover{background:#fff;border-color:var(--accent);color:var(--accent-ink);}
+
+  /* ─── 도구 등록하기 ─── */
+  .register{
+    position:relative;overflow:hidden;margin:40px auto 0;padding:24px 24px 20px;
+    border-radius:22px;border:1px solid var(--line);box-shadow:var(--shadow);
+    background:linear-gradient(135deg,#f5f8ff 0%,#faf7ff 54%,#fff7ee 100%);
+  }
+  .register::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:linear-gradient(90deg,#3f6ae8,#8b5cf6 58%,#f59e0b);}
+  .rg-head{display:flex;align-items:center;gap:14px;margin:0 0 12px;}
+  .rg-ico{
+    width:52px;height:52px;border-radius:16px;flex:none;display:flex;align-items:center;justify-content:center;
+    font-size:27px;background:#fff;box-shadow:0 6px 18px rgba(63,106,232,.16);
+  }
+  .rg-head h2{margin:0;font-size:20px;font-weight:800;letter-spacing:-.01em;}
+  .rg-head .rg-sub{margin:3px 0 0;font-size:14px;color:var(--ink-soft);}
+  .register p{margin:0 0 14px;font-size:15px;line-height:1.75;}
+  .rg-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 16px;padding:0;list-style:none;}
+  .rg-items li{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.6;}
+  .rg-items b{display:block;font-size:13px;color:var(--accent-ink);margin-bottom:3px;}
+
+  /* ─── 단추 ─── */
+  .btn{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:11px 17px;border-radius:13px;border:1px solid var(--line);
+    background:#fff;color:var(--ink);font-size:14.5px;font-weight:700;
+    cursor:pointer;text-decoration:none;font-family:inherit;transition:.18s;
+  }
+  .btn:hover{border-color:var(--brand);color:var(--brand-ink);}
+  .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 8px 20px rgba(63,106,232,.28);}
+  .btn.primary:hover{filter:brightness(1.06);color:#fff;}
+  .btn.small{padding:8px 13px;font-size:13.5px;}
+
+  /* ─── 사용법 안내 화면 ─── */
+  #howView{max-width:840px;margin:0 auto;}
+  .how-top{display:flex;align-items:center;gap:10px;margin:0 0 18px;}
+  .how-card{
+    background:var(--card);border:1px solid var(--line);border-radius:22px;
+    box-shadow:var(--shadow);padding:28px 28px 24px;
+  }
+  .how-head{display:flex;gap:15px;align-items:flex-start;margin:0 0 6px;}
+  .how-head .icon{width:56px;height:56px;border-radius:17px;font-size:29px;}
+  .how-head h2{margin:0;font-size:23px;font-weight:800;letter-spacing:-.01em;}
+  .how-by{margin:5px 0 0;font-size:13.5px;color:var(--ink-soft);}
+  .how-when{
+    margin:16px 0 22px;padding:14px 16px;border-radius:14px;
+    background:var(--accent-soft);color:var(--accent-ink);font-size:15px;font-weight:600;line-height:1.7;
+  }
+  .how-card h3{margin:22px 0 12px;font-size:16.5px;font-weight:800;display:flex;align-items:center;gap:8px;}
+  .how-steps{margin:0;padding:0 0 0 2px;list-style:none;counter-reset:st;}
+  .how-steps li{
+    counter-increment:st;position:relative;padding:0 0 14px 40px;font-size:15px;line-height:1.8;
+  }
+  .how-steps li::before{
+    content:counter(st);position:absolute;left:0;top:1px;
+    width:26px;height:26px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    background:var(--accent);color:#fff;font-size:13.5px;font-weight:800;
+  }
+  .how-cares{margin:0;padding:0;list-style:none;}
+  .how-cares li{
+    margin:0 0 10px;padding:12px 14px 12px 40px;position:relative;
+    border-radius:13px;background:#fff8ec;border:1px solid #f6e0bb;
+    color:#5c3804;font-size:14.5px;line-height:1.7;
+  }
+  .how-cares li::before{content:"⚠";position:absolute;left:14px;top:12px;font-size:15px;}
+  .how-links{display:flex;flex-wrap:wrap;gap:9px;margin-top:6px;}
+  .how-foot{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px;padding-top:18px;border-top:1px dashed var(--line);}
+  code{
+    background:#eef1f8;border:1px solid var(--line);border-radius:6px;
+    padding:1px 6px;font-size:.92em;font-family:"Cascadia Mono",Consolas,monospace;
+  }
+
+  /* ─── 제안하기 창 ─── */
+  dialog{
+    border:0;padding:0;border-radius:22px;max-width:620px;width:calc(100% - 32px);
+    box-shadow:0 30px 80px rgba(20,30,70,.34);background:var(--card);color:var(--ink);
+  }
+  dialog::backdrop{background:rgba(22,30,60,.46);backdrop-filter:blur(2px);}
+  .dlg{padding:26px 26px 22px;}
+  .dlg-head{display:flex;align-items:flex-start;gap:12px;margin:0 0 6px;}
+  .dlg-head h2{margin:0;font-size:20px;font-weight:800;}
+  .dlg-head .x{
+    margin-left:auto;flex:none;border:0;background:#f2f4fa;color:var(--ink-soft);
+    width:34px;height:34px;border-radius:11px;cursor:pointer;font-size:17px;font-family:inherit;
+  }
+  .dlg-head .x:hover{background:#e8ebf4;}
+  .dlg-sub{margin:0 0 18px;color:var(--ink-soft);font-size:14px;line-height:1.7;}
+  .fld{margin:0 0 13px;}
+  .fld label{display:block;font-size:13.5px;font-weight:700;margin:0 0 6px;}
+  .fld input,.fld textarea{
+    width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--line);
+    background:#fff;color:var(--ink);font-size:14.5px;font-family:inherit;outline:none;transition:.18s;
+  }
+  .fld textarea{min-height:76px;resize:vertical;line-height:1.65;}
+  .fld input:focus,.fld textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft);}
+  .dlg-foot{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px;}
+  .dlg-alt{margin:14px 0 0;font-size:13px;color:var(--ink-soft);line-height:1.7;}
+  .link-like{
+    border:0;background:none;padding:0;color:var(--brand);font:inherit;font-size:13px;
+    font-weight:700;cursor:pointer;text-decoration:underline;
+  }
+
+  /* ─── 알림 쪽지 ─── */
+  #toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);
+    background:#1f2a44;color:#fff;padding:12px 20px;border-radius:999px;
+    font-size:14.5px;font-weight:600;box-shadow:0 14px 34px rgba(20,30,70,.34);
+    opacity:0;pointer-events:none;transition:.2s;z-index:50;
+  }
+  #toast.on{opacity:1;transform:translate(-50%,0);}
+
+  footer.foot{
+    margin-top:44px;padding-top:20px;border-top:1px solid var(--line);
+    text-align:center;color:var(--ink-soft);font-size:13px;line-height:1.8;
+  }
+  .foot .local{
+    display:inline-block;margin-top:7px;padding:4px 11px;border-radius:999px;
+    background:#fff3e0;border:1px solid #f6e0bb;color:#7a4b06;font-size:12px;font-weight:700;
+  }
+
+  @media (max-width:640px){
+    .wrap{padding:28px 16px 44px;}
+    .grid{grid-template-columns:1fr;}
+    .how-card{padding:22px 18px 20px;}
+    .rg-items{grid-template-columns:1fr;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;}
+    .card:hover{transform:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="badge">🏫 와우고등학교 교원 전용</div>
+    <h1>와우고 <span class="grad">교원 포털</span></h1>
+    <p class="subtitle">선생님들이 만들어 쓰는 교내 도구를 한자리에 모았습니다.
+      카드를 눌러 바로 열고, 링크를 복사해 동료 선생님께 보내세요.</p>
+  </header>
+
+  <!-- ① 암호 가림막 — 잠근 판(locked.js)일 때만 뜬다 -->
+  <section id="gate" hidden>
+    <div class="gate-box">
+      <div class="gate-lock" aria-hidden="true">🔒</div>
+      <h2>교원 전용 — 암호를 넣어 주세요</h2>
+      <p>교내 도구 주소가 들어 있어 암호로 잠가 두었습니다.</p>
+      <form class="gate-row" id="gateForm">
+        <input type="password" id="gatePw" placeholder="암호" autocomplete="current-password"
+               aria-label="암호" autofocus>
+        <button type="submit" id="gateGo">들어가기</button>
+      </form>
+      <p class="gate-msg" id="gateMsg" role="status"></p>
+      <p class="gate-hint">암호를 모르시면 정보 교과 선생님께 문의하세요.<br>
+        한 번 넣으면 이 브라우저를 닫을 때까지 다시 묻지 않습니다.</p>
+    </div>
+  </section>
+
+  <!-- ② 카드 목록 -->
+  <main id="app" hidden>
+    <div class="toolbar">
+      <div class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <input type="search" id="q" placeholder="도구 이름 · 설명 · 만든이로 찾기" aria-label="도구 찾기">
+      </div>
+    </div>
+    <div class="filters" id="filters"></div>
+    <div id="sections"></div>
+
+    <section class="register" id="registerBox">
+      <div class="rg-head">
+        <div class="rg-ico" aria-hidden="true">🧑‍🏫</div>
+        <div>
+          <h2>도구 등록하기</h2>
+          <p class="rg-sub">선생님이 만들어 쓰시는 도구를 이 포털에 올려 드립니다</p>
+        </div>
+      </div>
+      <p>엑셀 양식 하나, 구글 시트 하나라도 괜찮습니다. 아래 다섯 가지만 메일로 보내 주시면 카드로 만들어 올립니다.
+        주소가 아직 없으면 「준비 중」 카드로 먼저 올려 두고 나중에 주소만 채울 수 있습니다.</p>
+      <ul class="rg-items">
+        <li><b>① 이름</b>무엇이라 부를까요</li>
+        <li><b>② 만든이</b>카드에 적을 성함</li>
+        <li><b>③ 주소</b>또는 파일이 있는 곳</li>
+        <li><b>④ 한 줄 설명</b>어떤 일을 하나요</li>
+        <li><b>⑤ 어느 칸</b>학급 · 수업 · 진학 · 시설</li>
+      </ul>
+      <button type="button" class="btn primary" id="registerBtn">✉️ 도구 등록 메일 쓰기</button>
+    </section>
+
+    <footer class="foot">
+      © 2026 티쳐무 · 모든 권리 보유 — 와우고등학교 교원 전용<br>
+      <span id="localBadge" class="local" hidden>로컬 원본 — 암호 없이 열립니다</span>
+    </footer>
+  </main>
+
+  <!-- ③ 사용법 안내 화면 (주소 #how-<key>) -->
+  <main id="howView" hidden></main>
+</div>
+
+<dialog id="dlg"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="updated.js?v=202611170059"></script>
+<!-- 내용 — 로컬 원본은 content.js, 깃허브에 올리는 잠근 판은 locked.js (tools/lock.mjs 가 바꿔 넣는다) -->
+<script src="locked.js"></script>
+<script>
+/*! 와우고 교원 포털 — © 2026 티쳐무 · 모든 권리 보유 */
+(function(){
+"use strict";
+
+const $ = (s)=>document.querySelector(s);
+const gateEl = $('#gate'), appEl = $('#app'), howEl = $('#howView');
+const sectionsEl = $('#sections'), filtersEl = $('#filters'), qEl = $('#q');
+const dlgEl = $('#dlg'), toastEl = $('#toast');
+
+let P = null;            // 내용 (카드 · 사용법 · 메일 주소)
+let activeCat = "전체";
+const ITEMS = {};        // 열쇠 → 카드
+
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ─── 알림 쪽지 ─────────────────────────────────────────
+let toastTimer = 0;
+function toast(msg){
+  // 창(dialog)이 열려 있으면 그 안에 넣는다 — showModal() 로 연 창은 맨 위 층(top layer)에 떠서
+  // 바깥의 쪽지는 z-index 를 아무리 올려도 창 뒤에 가린다(실제로 안 보였다)
+  const host = dlgEl.open ? dlgEl : document.body;
+  if(toastEl.parentNode !== host) host.appendChild(toastEl);
+  toastEl.textContent = msg;
+  toastEl.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toastEl.classList.remove('on'), 2200);
+}
+
+// 클립보드는 https 와 localhost 에서만 된다 — 안 되면 옛 방법으로 한 번 더 해 본다
+async function copyText(text, done){
+  try{
+    await navigator.clipboard.writeText(text);
+    toast(done || '복사했습니다');
+    return true;
+  }catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly','');
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    // 창(dialog)이 열려 있으면 그 안에 붙인다 — showModal() 로 연 창은 바깥을 통째로 멎게(inert) 해
+    // body 에 붙인 임시 상자는 고를 수도 복사할 수도 없다
+    (dlgEl.open ? dlgEl : document.body).appendChild(ta);
+    ta.select();
+    let ok = false;
+    try{ ok = document.execCommand('copy'); }catch(_){ ok = false; }
+    ta.remove();
+    toast(ok ? (done || '복사했습니다') : '복사가 막혔습니다 — 주소를 직접 선택해 복사해 주세요');
+    return ok;
+  }
+}
+
+// ─── 날짜 ──────────────────────────────────────────────
+// 손으로 적은 made·updated 가 있으면 그것이 이기고, 없으면 updated.js(저장소 첫·마지막 커밋)를 쓴다
+function datesOf(it){
+  const U = window.UPDATED || {};
+  let auto = (it.repo && U[it.repo]) || {};
+  if(typeof auto === 'string') auto = { updated: auto };
+  return { made: it.made || auto.made || '', updated: it.updated || auto.updated || '' };
+}
+function fmtDate(d){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || '');
+  return m ? `${m[1]}. ${+m[2]}. ${+m[3]}.` : '';
+}
+
+function kindOf(it, group){
+  return it.kind || group.kind || '웹앱';
+}
+
+// ─── 카드 ──────────────────────────────────────────────
+function cardEl(it, group){
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.setProperty('--accent', group.color);
+  card.style.setProperty('--accent-soft', group.soft);
+  card.style.setProperty('--accent-ink', group.ink || group.color);
+
+  const d = datesOf(it);
+  const made = fmtDate(d.made), upd = fmtDate(d.updated);
+  const meta = [`<span title="이 도구를 만든 사람">🙋 ${esc(it.by || '—')}</span>`];
+  if(made) meta.push(`<span title="처음 만든 날 (깃허브 저장소 첫 커밋)">📅 ${made} 만듦</span>`);
+  if(upd)  meta.push(`<span title="최신 업데이트 (깃허브 저장소 마지막 커밋)">🔄 ${upd} 업데이트</span>`);
+
+  const hasUrl = !!it.url;
+  const title = hasUrl
+    ? `<a class="stretch" href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.title)}</a>`
+    : esc(it.title);
+  const open = hasUrl
+    ? `<a class="c-open" href="${esc(it.url)}" target="_blank" rel="noopener">바로 열기 →</a>`
+      + `<button type="button" class="c-side" data-copy="${esc(it.url)}" title="공유 링크 복사 — 동료 선생님께 보낼 주소"
+                 aria-label="${esc(it.title)} 공유 링크 복사">🔗</button>`
+    : `<span class="c-open" style="background:#eef1f8;color:#5b6785">주소 준비 중</span>`;
+
+  card.innerHTML = `
+    <div class="c-top">
+      <div class="icon" aria-hidden="true">${it.icon || '🧰'}</div>
+      <div class="c-title"><span class="tag">${esc(kindOf(it, group))}</span><h3>${title}</h3></div>
+    </div>
+    <p>${esc(it.desc)}</p>
+    ${it.warn ? `<div class="warn">${it.warn}</div>` : ''}
+    <div class="c-bottom">
+      <div class="c-meta">${meta.join('')}</div>
+      <div class="c-main">${open}</div>
+      <div class="c-pills">
+        <button type="button" class="pill" data-idea="${esc(it.key)}"
+                title="틀린 곳 · 고장 · 바라는 기능 알리기">💡 제안하기</button>
+        ${P.guides[it.key] ? `<button type="button" class="pill" data-how="${esc(it.key)}"
+                title="이럴 때 씁니다 · 쓰는 순서 · 주의">📖 사용법</button>` : ''}
+      </div>
+    </div>`;
+  return card;
+}
+
+function render(){
+  const q = qEl.value.trim().toLowerCase();
+  sectionsEl.innerHTML = '';
+  let total = 0;
+
+  P.groups.forEach(group=>{
+    if(activeCat !== '전체' && activeCat !== group.cat) return;
+    const items = group.items.filter(it=>
+      !q || it.title.toLowerCase().includes(q)
+         || String(it.desc).toLowerCase().includes(q)
+         || String(it.by).toLowerCase().includes(q)
+         || kindOf(it, group).toLowerCase().includes(q)
+    );
+    // 아직 도구가 없는 칸은 찾는 중이 아닐 때만 「준비 중」으로 보여 준다
+    const soon = group.items.length === 0 && group.soon && !q;
+    if(items.length === 0 && !soon) return;
+    total += items.length;
+
+    const sec = document.createElement('div');
+    sec.className = 'section';
+    sec.innerHTML = `
+      <div class="section-head">
+        <span class="dot" style="background:${group.dot}"></span>
+        <h2>${esc(group.cat)}</h2>
+        <span class="count">${soon ? '준비 중' : items.length}</span>
+      </div>
+      ${soon ? `<div class="soon">${group.soon}</div>` : '<div class="grid"></div>'}`;
+    if(!soon){
+      const grid = sec.querySelector('.grid');
+      items.forEach(it=> grid.appendChild(cardEl(it, group)));
+    }
+    sectionsEl.appendChild(sec);
+  });
+
+  if(total === 0 && q){
+    sectionsEl.innerHTML = `<div class="soon">찾으시는 도구가 없습니다 —
+      <b>${esc(qEl.value.trim())}</b> 로 찾은 것이 없어요.
+      아래 <b>[도구 등록하기]</b>로 알려 주시면 만들어 올립니다.</div>`;
+  }
+}
+
+// ─── 사용법 안내 화면 ───────────────────────────────────
+function showHow(key, push){
+  const it = ITEMS[key], g = P.guides[key];
+  if(!it || !g){ showList(true); return; }
+  const group = it._group;
+  const d = datesOf(it);
+  const made = fmtDate(d.made), upd = fmtDate(d.updated);
+  const by = [`🙋 만든이 ${esc(it.by || '—')}`];
+  if(made) by.push(`📅 ${made} 만듦`);
+  if(upd)  by.push(`🔄 ${upd} 업데이트`);
+
+  howEl.innerHTML = `
+    <div class="how-top">
+      <button type="button" class="btn small" data-back>← 목록으로</button>
+      <button type="button" class="btn small" data-copy="${esc(howLink(key))}"
+              title="이 사용법 쪽 주소를 복사합니다">🔗 이 안내 링크 복사</button>
+    </div>
+    <div class="how-card" style="--accent:${group.color};--accent-soft:${group.soft};--accent-ink:${group.ink || group.color}">
+      <div class="how-head">
+        <div class="icon" aria-hidden="true">${it.icon || '🧰'}</div>
+        <div>
+          <span class="tag">${esc(kindOf(it, group))} · ${esc(group.cat)}</span>
+          <h2>${esc(it.title)}</h2>
+          <p class="how-by">${by.join(' · ')}</p>
+        </div>
+      </div>
+      <div class="how-when">${g.when}</div>
+      ${it.warn ? `<div class="warn">${it.warn}</div>` : ''}
+      <h3>🧭 쓰는 순서</h3>
+      <ol class="how-steps">${(g.steps || []).map(s=>`<li>${s}</li>`).join('')}</ol>
+      ${(g.cares && g.cares.length) ? `<h3>⚠️ 알아 두실 것</h3>
+        <ul class="how-cares">${g.cares.map(s=>`<li>${s}</li>`).join('')}</ul>` : ''}
+      ${(g.links && g.links.length) ? `<h3>🔗 함께 열어 둘 곳</h3>
+        <div class="how-links">${g.links.map(l=>
+          `<a class="btn" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('')}</div>` : ''}
+      <div class="how-foot">
+        ${it.url ? `<a class="btn primary" href="${esc(it.url)}" target="_blank" rel="noopener">바로 열기 →</a>
+          <button type="button" class="btn" data-copy="${esc(it.url)}">🔗 공유 링크 복사</button>` : ''}
+        <button type="button" class="btn" data-idea="${esc(key)}">💡 제안하기</button>
+      </div>
+    </div>`;
+  appEl.hidden = true;
+  howEl.hidden = false;
+  window.scrollTo(0, 0);
+  if(push) history.pushState({ view:'how', key }, '', '#how-' + key);
+}
+
+function showList(replace){
+  howEl.hidden = true;
+  howEl.innerHTML = '';
+  appEl.hidden = false;
+  if(replace && location.hash) history.pushState({ view:'list' }, '', location.pathname + location.search);
+}
+
+function howLink(key){
+  return location.href.split('#')[0] + '#how-' + key;
+}
+
+// ─── 💡 제안하기 · 도구 등록 메일 창 ─────────────────────
+function openMail(mode, key){
+  const it = key ? ITEMS[key] : null;
+  const isReg = mode === 'register';
+  const title = isReg ? '🧑‍🏫 도구 등록하기' : '💡 제안하기';
+  const sub = isReg
+    ? '다섯 가지만 채워 보내 주시면 카드로 만들어 올립니다. 메일 앱이 열리지 않으면 [📋 내용 복사]를 쓰세요.'
+    : `<b>${esc(it ? it.title : '포털')}</b> 에 대해 알려 주실 것을 적어 주세요. 틀린 곳·고장·바라는 기능 모두 좋습니다.`;
+
+  const fields = isReg
+    ? [['이름', 'name', 'input', '예) 3학년 봉사활동 시간 집계표'],
+       ['만든이 — 카드에 적을 성함', 'by', 'input', '예) 홍길동'],
+       ['주소 또는 파일이 있는 곳', 'where', 'input', '예) 구글 시트 주소 · 공유 드라이브 폴더 (없으면 비워 두세요)'],
+       ['한 줄 설명', 'what', 'textarea', '어떤 일을 하는 도구인가요'],
+       ['어느 칸에 둘까요', 'cat', 'input', '학급 운영 · 수업·평가 · 진학·진로 · 학교 시설·행사']]
+    : [['어느 화면에서', 'where', 'input', '예) 자리 뽑기 화면 · 출석부 인쇄'],
+       ['무엇이', 'what', 'textarea', '무엇이 틀렸거나 불편했나요'],
+       ['어떻게 되면 좋을까요', 'wish', 'textarea', '바라는 모습을 적어 주세요']];
+  fields.push(['보낸 분 (학교 · 성함)', 'who', 'input', '답을 드릴 수 있게 적어 주세요 (안 적어도 됩니다)']);
+
+  dlgEl.innerHTML = `
+    <form class="dlg" id="mailForm">
+      <div class="dlg-head">
+        <h2>${title}</h2>
+        <button type="button" class="x" data-close aria-label="닫기">✕</button>
+      </div>
+      <p class="dlg-sub">${sub}</p>
+      ${fields.map(([label, name, tag, ph])=> `
+        <div class="fld">
+          <label for="f-${name}">${esc(label)}</label>
+          ${tag === 'textarea'
+            ? `<textarea id="f-${name}" name="${name}" placeholder="${esc(ph)}"></textarea>`
+            : `<input id="f-${name}" name="${name}" placeholder="${esc(ph)}">`}
+        </div>`).join('')}
+      <div class="dlg-foot">
+        <button type="submit" class="btn primary">✉️ 메일 앱으로 보내기</button>
+        <button type="button" class="btn" data-mail-copy>📋 내용 복사</button>
+        <button type="button" class="btn" data-close>닫기</button>
+      </div>
+      <p class="dlg-alt">메일 앱이 열리지 않으면 <b>[📋 내용 복사]</b> 후 쓰시는 메일에서
+        <b>${esc(P.mail)}</b> 로 보내 주세요.
+        <button type="button" class="link-like" data-copy="${esc(P.mail)}">메일 주소 복사</button></p>
+    </form>`;
+
+  const form = dlgEl.querySelector('#mailForm');
+  const subject = isReg
+    ? '[와우고 교원 포털] 도구 등록 요청'
+    : `[와우고 교원 포털] 제안 — ${it ? it.title : '포털'}`;
+
+  function body(){
+    const v = (n)=> (form.elements[n] ? form.elements[n].value.trim() : '');
+    const lines = isReg
+      ? ['① 이름: ' + v('name'), '② 만든이: ' + v('by'), '③ 주소·파일 위치: ' + v('where'),
+         '④ 한 줄 설명: ' + v('what'), '⑤ 어느 칸: ' + v('cat')]
+      : [(it ? '도구: ' + it.title + (it.url ? ' (' + it.url + ')' : '') : '포털 전체'),
+         '어느 화면에서: ' + v('where'), '무엇이: ' + v('what'), '어떻게 되면 좋을까요: ' + v('wish')];
+    lines.push('', '보낸 분: ' + v('who'));
+    return lines.join('\n');
+  }
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    location.href = `mailto:${P.mail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body())}`;
+  });
+  dlgEl.querySelector('[data-mail-copy]').addEventListener('click', ()=>{
+    copyText(subject + '\n\n' + body(), '내용을 복사했습니다 — 쓰시는 메일에 붙여 넣으세요');
+  });
+  dlgEl.showModal();
+  document.documentElement.classList.add('locked');
+}
+
+dlgEl.addEventListener('close', ()=> document.documentElement.classList.remove('locked'));
+
+// ─── 누름 한 곳에서 받기 ────────────────────────────────
+document.addEventListener('click', (e)=>{
+  const copy = e.target.closest('[data-copy]');
+  if(copy){ copyText(copy.dataset.copy, '링크를 복사했습니다'); return; }
+
+  const how = e.target.closest('[data-how]');
+  if(how){ showHow(how.dataset.how, true); return; }
+
+  const idea = e.target.closest('[data-idea]');
+  if(idea){ openMail('idea', idea.dataset.idea); return; }
+
+  if(e.target.closest('[data-back]')){ showList(true); return; }
+  if(e.target.closest('[data-close]')){ dlgEl.close(); return; }
+  if(e.target.closest('#registerBtn')){ openMail('register'); return; }
+});
+
+window.addEventListener('popstate', ()=> route());
+
+function route(){
+  const key = (location.hash.match(/^#how-([\w-]+)$/) || [])[1];
+  if(key && P.guides[key]) showHow(key, false);
+  else showList(false);
+}
+
+// ─── 암호 풀기 (잠근 판) ────────────────────────────────
+function b64ToBytes(s){
+  const bin = atob(s);
+  const out = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+async function unlock(pw){
+  const L = window.LOCKED;
+  const enc = new TextEncoder();
+  const base = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:b64ToBytes(L.salt), iterations:L.iter, hash:'SHA-256' },
+    base, { name:'AES-GCM', length:256 }, false, ['decrypt']);
+  const plain = await crypto.subtle.decrypt(
+    { name:'AES-GCM', iv:b64ToBytes(L.iv) }, key, b64ToBytes(L.data));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+function start(payload){
+  P = payload;
+  P.guides = P.guides || {};
+  // 카드마다 제 칸을 기억해 둔다 (사용법 화면이 칸 색을 쓴다)
+  P.groups.forEach(g=> g.items.forEach(it=>{ it._group = g; ITEMS[it.key] = it; }));
+
+  filtersEl.innerHTML = ['전체', ...P.groups.map(g=> g.chip || g.cat)]
+    .map((label, i)=>{
+      const cat = i === 0 ? '전체' : P.groups[i-1].cat;
+      return `<button type="button" class="chip${i === 0 ? ' active' : ''}" data-cat="${esc(cat)}">${esc(label)}</button>`;
+    }).join('');
+  filtersEl.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.chip');
+    if(!btn) return;
+    activeCat = btn.dataset.cat;
+    [...filtersEl.children].forEach(ch=> ch.classList.toggle('active', ch === btn));
+    render();
+  });
+  qEl.addEventListener('input', render);
+
+  gateEl.hidden = true;
+  render();
+  route();
+}
+
+const PW_KEY = 'wawoogo-portal-pw';
+
+async function tryUnlock(pw, fromStore){
+  const msg = $('#gateMsg'), go = $('#gateGo');
+  go.disabled = true;
+  msg.textContent = '';
+  try{
+    const payload = await unlock(pw);
+    sessionStorage.setItem(PW_KEY, pw);
+    start(payload);
+  }catch(e){
+    try{ sessionStorage.removeItem(PW_KEY); }catch(_){}
+    if(!fromStore){
+      msg.textContent = '암호가 맞지 않습니다. 다시 넣어 주세요.';
+      $('#gatePw').select();
+    }
+  }finally{
+    go.disabled = false;
+  }
+}
+
+function bootLocked(){
+  gateEl.hidden = false;
+  if(!window.crypto || !window.crypto.subtle){
+    // file:// 로 열면 브라우저가 암호 풀기(WebCrypto)를 막는다
+    $('#gateForm').hidden = true;
+    $('#gateMsg').innerHTML = '이 파일은 <b>주소(https)로 열어야</b> 암호를 풀 수 있습니다.<br>포털 주소로 다시 열어 주세요.';
+    return;
+  }
+  $('#gateForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const pw = $('#gatePw').value;
+    if(pw) tryUnlock(pw, false);
+  });
+  let saved = '';
+  try{ saved = sessionStorage.getItem(PW_KEY) || ''; }catch(_){}
+  if(saved) tryUnlock(saved, true);
+}
+
+// 로컬 원본(content.js)이면 암호 없이 바로, 잠근 판(locked.js)이면 가림막부터
+if(window.PAYLOAD){
+  $('#localBadge').hidden = false;
+  start(window.PAYLOAD);
+}else if(window.LOCKED){
+  bootLocked();
+}else{
+  gateEl.hidden = false;
+  $('#gateForm').hidden = true;
+  $('#gateMsg').textContent = '내용 파일(content.js 또는 locked.js)을 읽지 못했습니다.';
+}
+})();
+</script>
+</body>
+</html>
