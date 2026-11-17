@@ -7,6 +7,6 @@ window.UPDATED = {
   "csat2027": { made: "2026-11-16", updated: "2026-11-16" },
   "major-map": { made: "2026-09-03", updated: "2026-10-21" },
   "mini-book-fair": { made: "2026-11-10", updated: "2026-11-10" },
-  "wawoo_studycafe": { made: "2026-11-16", updated: "2026-11-16" },
+  "wawoo_studycafe": { made: "2026-11-16", updated: "2026-11-17" },
   "wawoohs-3d": { made: "2026-11-10", updated: "2026-11-10" },
 };
